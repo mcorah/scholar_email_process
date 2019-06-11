@@ -69,11 +69,12 @@ class Paper:
     def addSubject(self, subject):
         self.subjects.append(subject)
 
+    def subjectsString(self):
+        return ', '.join(map(abbreviateSubject, self.subjects))
+
     def summarize(self):
         print("Title: " + self.title)
-        print("Subjects:")
-        for subject in self.subjects:
-            print("  " + abbreviateSubject(subject))
+        print("Subjects: " + self.subjectsString())
         print()
 
 
