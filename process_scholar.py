@@ -55,7 +55,7 @@ def parseResults(s):
 def abbreviateSubject(s):
     if citesMe(s):
         return "me(c)"
-    elif "results" in s:
+    elif isResults(s):
         # results for general queries
         return parseResults(s)
     else:
