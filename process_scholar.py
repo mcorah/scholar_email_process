@@ -34,6 +34,29 @@ def summarizeMessages(gmail, messages):
         message = readMessage(gmail, a['id'], format='minimal')
         print(message['snippet'])
 
+def parseMessages(gmail, messages):
+    for a in messages:
+        parseMessage(gmail, a['id'])
+
+def parseMessage(gmail, message_id):
+    message = readMessage(gmail, message_id)
+
+    print(message['snippet'])
+
+    payload = message['payload']
+    headers = payload.get('headers', [])
+    print()
+    print(getSubject(headers))
+    print()
+    body = payload['body']
+
+# pulls subject from the header
+def getSubject(headers):
+    for header in headers:
+        if header['name'] == 'Subject':
+            return header['value']
+
+
 
 def main():
     """Shows basic usage of the Gmail API.
@@ -61,10 +84,8 @@ def main():
     gmail = build('gmail', 'v1', credentials=creds)
 
     messages = getScholarMessages(gmail)
-    print("Messages")
-    print(messages)
 
-    summarizeMessages(gmail, messages)
+    parseMessages(gmail, messages)
 
 
 if __name__ == '__main__':
