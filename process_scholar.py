@@ -9,15 +9,29 @@ from google.auth.transport.requests import Request
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 ID = 'me'
+scholar_email = 'scholaralerts-noreply@google.com'
 
 def getLabel(gmail, label_name):
-    label = gmail.users().labels().get(id=label_name, userId=ID).execute()
-    return label
+    return gmail.users().labels().get(id=label_name, userId=ID).execute()
 
+# Returns matching message ids
 def getMessages(gmail, label_name, query=""):
-    messages = gmail.users().messages().list(\
+    json = gmail.users().messages().list(\
             userId=ID, labelIds=[label_name], q=query).execute()
-    return messages
+    return json.get('messages', [])
+
+# Returns ids of matching scholar messages
+def getScholarMessages(gmail):
+    return getMessages(gmail, "UNREAD", query="from:" + scholar_email)
+
+def readMessage(gmail, message_id, format="full"):
+    return gmail.users().messages().get(id=message_id, userId=ID, format=format).execute()
+
+def summarizeMessages(gmail, messages):
+    for a in messages:
+        message = readMessage(gmail, a['id'], format='minimal')
+        print(message)
+
 
 def main():
     """Shows basic usage of the Gmail API.
@@ -44,14 +58,11 @@ def main():
 
     gmail = build('gmail', 'v1', credentials=creds)
 
-    unread = getLabel(gmail, "UNREAD")
-
-    print("Label id: " + unread['name'])
-    print(unread)
-
-    messages = getMessages(gmail, "UNREAD")
+    messages = getScholarMessages(gmail)
     print("Messages")
     print(messages)
+
+    summarizeMessages(gmail, messages)
 
 
 if __name__ == '__main__':
