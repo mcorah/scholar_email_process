@@ -61,7 +61,7 @@ def parseMessage(gmail, message_id):
 
     text = base64.urlsafe_b64decode(body)
     soup = BeautifulSoup(text, 'html.parser')
-    print(soup.prettify())
+    dunkForPapers(soup)
 
 # pulls subject from the header
 def getSubject(headers):
@@ -71,6 +71,12 @@ def getSubject(headers):
         if header['name'] == 'Subject':
             return header['value']
 
+def dunkForPapers(soup):
+    contents = soup.body.div.contents
+    for count, item in enumerate(contents):
+        print()
+        print("Contents: " + str(count))
+        print(item.prettify())
 
 
 def main():
