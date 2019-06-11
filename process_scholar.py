@@ -60,7 +60,7 @@ def parseMessage(gmail, message_id):
     print('mimeType:')
     print(payload['mimeType'])
 
-    print('Body:')
+    #print('Body:')
     body = payload['body']['data']
 
     text = base64.urlsafe_b64decode(body)
@@ -69,9 +69,7 @@ def parseMessage(gmail, message_id):
 
     print("Papers:")
     for paper in papers:
-        print("Paper")
-        for tag in paper:
-            print(tag.prettify())
+        print(getTitle(paper))
 
 # pulls subject from the header
 def getSubject(headers):
@@ -85,12 +83,15 @@ def dunkForPapers(soup):
     raw_papers = []
     contents = soup.body.div.contents
     for count, item in enumerate(contents):
-        print("Contents: " + str(count))
         if item.name == entry_start:
-            print("found entry!")
             raw_papers.append(contents[count:count+entry_length])
 
     return raw_papers
+
+# pulls title string from a raw paper
+def getTitle(raw_paper):
+    # title is in the first tag under 'a'
+    return raw_paper[0].a.string
 
 
 def main():
