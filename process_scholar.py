@@ -137,7 +137,10 @@ def parseMessage(gmail, message_id):
 
     #print("Papers:")
     #for paper in papers:
-        #print(getTitle(paper))
+        #print("Paper ************************************")
+        #for tag in paper:
+            #print(tag.prettify())
+        #print()
 
     return subject, papers
 
