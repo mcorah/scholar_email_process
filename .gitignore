@@ -1,0 +1,4 @@
+*.pickle
+client.txt
+credentials.json
+*~
