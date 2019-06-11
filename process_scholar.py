@@ -18,6 +18,39 @@ scholar_email = 'scholaralerts-noreply@google.com'
 entry_start = "h3"
 entry_length = 5
 
+
+# returns true if the subject is for articles that cite me
+def citesMe(s):
+    return s == "New citations to my articles"
+
+# pull name for authors
+def parseName(s):
+    return s[0:s.find("-")-1]
+
+# check whether the subject refers to an author citation (or article)
+def isCitation(s):
+    return "citations" in s
+
+def parseResults(s):
+    return parseName(s)
+
+# abbreviate the subject string
+def abbreviateSubject(s):
+    if citesMe(s):
+        return "me(c)"
+    elif "results" in s:
+        # results for general queries
+        return parseResults(s)
+    else:
+        # results for authors
+        name = parseName(s)
+        if isCitation(s):
+            return name + "(c)"
+        else:
+            # (is an article)
+            return name + "(a)"
+
+# Representation of a single paper alert and the related topics
 class Paper:
     def __init__(self, body):
         self.body = body
@@ -29,8 +62,13 @@ class Paper:
 
     def summarize(self):
         print("Title: " + self.title)
+        print("Subjects:")
+        for subject in self.subjects:
+            print("  " + abbreviateSubject(subject))
+        print()
 
 
+# Pull an email label such as "UNREAD"
 def getLabel(gmail, label_name):
     return gmail.users().labels().get(id=label_name, userId=ID).execute()
 
@@ -54,6 +92,7 @@ def summarizeMessages(gmail, messages):
         message = readMessage(gmail, a['id'], format='minimal')
         #print(message['snippet'])
 
+# Turn scholar updates into a map from titles to paper objects
 def parseMessages(gmail, messages):
     papers = {}
     for a in messages:
