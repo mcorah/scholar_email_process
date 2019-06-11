@@ -24,13 +24,15 @@ def getMessages(gmail, label_name, query=""):
 def getScholarMessages(gmail):
     return getMessages(gmail, "UNREAD", query="from:" + scholar_email)
 
+# Takes a message id and reads the message using google api
 def readMessage(gmail, message_id, format="full"):
     return gmail.users().messages().get(id=message_id, userId=ID, format=format).execute()
 
+# Writes snippets from messages
 def summarizeMessages(gmail, messages):
     for a in messages:
         message = readMessage(gmail, a['id'], format='minimal')
-        print(message)
+        print(message['snippet'])
 
 
 def main():
