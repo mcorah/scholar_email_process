@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+from bs4 import BeautifulSoup
 import base64
 
 # If modifying these scopes, delete the file token.pickle.
@@ -59,8 +60,8 @@ def parseMessage(gmail, message_id):
     body = payload['body']['data']
 
     text = base64.urlsafe_b64decode(body)
-
-    print(text)
+    soup = BeautifulSoup(text, 'html.parser')
+    print(soup.prettify())
 
 # pulls subject from the header
 def getSubject(headers):
