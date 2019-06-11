@@ -18,10 +18,18 @@ scholar_email = 'scholaralerts-noreply@google.com'
 entry_start = "h3"
 entry_length = 5
 
+special_authors = ["Nathan Michael"]
+
 
 # returns true if the subject is for articles that cite me
 def citesMe(s):
     return s == "New citations to my articles"
+
+def isSpecial(s):
+    for author in special_authors:
+        if author in s:
+            return True
+    return False
 
 # pull name for authors
 def parseName(s):
