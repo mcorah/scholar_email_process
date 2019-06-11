@@ -5,6 +5,8 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+import base64
+
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
@@ -46,12 +48,24 @@ def parseMessage(gmail, message_id):
     payload = message['payload']
     headers = payload.get('headers', [])
     print()
-    print(getSubject(headers))
+    subject = getSubject(headers)
+    print(subject)
     print()
-    body = payload['body']
+
+    print('mimeType:')
+    print(payload['mimeType'])
+
+    print('Body:')
+    body = payload['body']['data']
+
+    text = base64.urlsafe_b64decode(body)
+
+    print(text)
 
 # pulls subject from the header
 def getSubject(headers):
+    for header in headers:
+        print(header['name'])
     for header in headers:
         if header['name'] == 'Subject':
             return header['value']
