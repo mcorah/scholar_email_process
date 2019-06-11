@@ -25,12 +25,21 @@ def citesMe(s):
 
 # pull name for authors
 def parseName(s):
-    return s[0:s.find("-")-1]
+    return s[0:s.rfind("-")-1]
 
 # check whether the subject refers to an author citation (or article)
 def isCitation(s):
-    return "citations" in s
+    return "new citations" in s
 
+# is an article
+def isArticle(s):
+    return "new articles" in s
+
+# is new results
+def isResults(s):
+    return "new results" in s
+
+# parse results
 def parseResults(s):
     return parseName(s)
 
