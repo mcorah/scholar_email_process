@@ -162,7 +162,7 @@ def dunkForPapers(soup):
 # pulls title string from a raw paper
 def getTitle(raw_paper):
     # title is in the first tag under 'a'
-    return raw_paper[0].a.string
+    return raw_paper[0].a.get_text()
 
 
 def main():
