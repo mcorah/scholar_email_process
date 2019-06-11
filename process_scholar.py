@@ -14,6 +14,10 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
 
+# match email entries
+entry_start = "h3"
+entry_length = 5
+
 def getLabel(gmail, label_name):
     return gmail.users().labels().get(id=label_name, userId=ID).execute()
 
@@ -61,7 +65,13 @@ def parseMessage(gmail, message_id):
 
     text = base64.urlsafe_b64decode(body)
     soup = BeautifulSoup(text, 'html.parser')
-    dunkForPapers(soup)
+    papers = dunkForPapers(soup)
+
+    print("Papers:")
+    for paper in papers:
+        print("Paper")
+        for tag in paper:
+            print(tag.prettify())
 
 # pulls subject from the header
 def getSubject(headers):
@@ -72,11 +82,15 @@ def getSubject(headers):
             return header['value']
 
 def dunkForPapers(soup):
+    raw_papers = []
     contents = soup.body.div.contents
     for count, item in enumerate(contents):
-        print()
         print("Contents: " + str(count))
-        print(item.prettify())
+        if item.name == entry_start:
+            print("found entry!")
+            raw_papers.append(contents[count:count+entry_length])
+
+    return raw_papers
 
 
 def main():
