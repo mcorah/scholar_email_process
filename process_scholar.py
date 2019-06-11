@@ -18,6 +18,19 @@ scholar_email = 'scholaralerts-noreply@google.com'
 entry_start = "h3"
 entry_length = 5
 
+class Paper:
+    def __init__(self, body):
+        self.body = body
+        self.title = getTitle(body)
+        self.subjects = []
+
+    def addSubject(self, subject):
+        self.subjects.append(subject)
+
+    def summarize(self):
+        print("Title: " + self.title)
+
+
 def getLabel(gmail, label_name):
     return gmail.users().labels().get(id=label_name, userId=ID).execute()
 
@@ -39,26 +52,33 @@ def readMessage(gmail, message_id, format="full"):
 def summarizeMessages(gmail, messages):
     for a in messages:
         message = readMessage(gmail, a['id'], format='minimal')
-        print(message['snippet'])
+        #print(message['snippet'])
 
 def parseMessages(gmail, messages):
+    papers = {}
     for a in messages:
-        parseMessage(gmail, a['id'])
+        subject, raw_papers = parseMessage(gmail, a['id'])
+        for raw_paper in raw_papers:
+            title = getTitle(raw_paper)
+            if not title in papers:
+                papers[title] = Paper(raw_paper)
+            papers[title].addSubject(subject)
+    return papers
 
 def parseMessage(gmail, message_id):
     message = readMessage(gmail, message_id)
 
-    print(message['snippet'])
+    #print(message['snippet'])
 
     payload = message['payload']
     headers = payload.get('headers', [])
-    print()
+    #print()
     subject = getSubject(headers)
-    print(subject)
-    print()
+    #print(subject)
+    #print()
 
-    print('mimeType:')
-    print(payload['mimeType'])
+    #print('mimeType:')
+    #print(payload['mimeType'])
 
     #print('Body:')
     body = payload['body']['data']
@@ -67,14 +87,14 @@ def parseMessage(gmail, message_id):
     soup = BeautifulSoup(text, 'html.parser')
     papers = dunkForPapers(soup)
 
-    print("Papers:")
-    for paper in papers:
-        print(getTitle(paper))
+    #print("Papers:")
+    #for paper in papers:
+        #print(getTitle(paper))
+
+    return subject, papers
 
 # pulls subject from the header
 def getSubject(headers):
-    for header in headers:
-        print(header['name'])
     for header in headers:
         if header['name'] == 'Subject':
             return header['value']
@@ -121,7 +141,9 @@ def main():
 
     messages = getScholarMessages(gmail)
 
-    parseMessages(gmail, messages)
+    papers = parseMessages(gmail, messages)
+    for paper in papers.values():
+        paper.summarize()
 
 
 if __name__ == '__main__':
