@@ -4,15 +4,22 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from apiclient import errors
 
 from bs4 import BeautifulSoup
 import base64
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
+
+send_email = True
 
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
+email_subject = "Google Scholar Summary!"
+address = 'micahcorah@gmail.com'
 
 # match email entries
 entry_start = "h3"
@@ -173,6 +180,35 @@ def getTitle(raw_paper):
     # title is in the first tag under 'a'
     return raw_paper[0].a.get_text()
 
+# construct the output email
+# see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
+def constructEmail(papers):
+    message = MIMEMultipart('alternative')
+    message['To'] = address
+    message['From'] = address
+    message['Subject'] = email_subject
+    message.attach(MIMEText('Hello World!', 'plain'))
+    return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
+
+
+# see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
+def sendMessage(gmail, message):
+  """Send an email message.
+  Args:
+    service: Authorized Gmail API service instance.
+    user_id: User's email address. The special value "me"
+    can be used to indicate the authenticated user.
+    message: Message to be sent.
+  Returns:
+    Sent Message.
+  """
+  try:
+    message = (gmail.users().messages().send(userId=ID, body=message)
+               .execute())
+    print('Message Id: %s' % message['id'])
+    return message
+  except errors.HttpError as error:
+    print('An error occurred: %s' % error)
 
 def main():
     """Shows basic usage of the Gmail API.
@@ -204,6 +240,11 @@ def main():
     papers = parseMessages(gmail, messages)
     for paper in papers.values():
         paper.summarize()
+
+    if send_email == True:
+        message = constructEmail(papers)
+        sendMessage(gmail, message)
+
 
 
 if __name__ == '__main__':
