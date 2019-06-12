@@ -15,6 +15,8 @@ import base64
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 send_email = True
+show_scholar_emails = False
+show_template = True
 
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
