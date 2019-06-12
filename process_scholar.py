@@ -339,22 +339,24 @@ def main():
     gmail = build('gmail', 'v1', credentials=creds)
 
     messages = getScholarMessages(gmail)
-    if len(messages) > 0:
+    if len(messages) == 0:
+        print('There are no scholar emails to process.')
+    else:
         template = constructSoupTemplate(gmail, messages[0])
 
         papers = parseMessagePapers(gmail, messages)
         for paper in papers:
             paper.summarize()
 
-    if send_email == True:
-        message_soup = constructDigestSoup(papers=papers, template=template)
-        message = constructEmail(text=message_soup.get_text(),
-                                 html=str(message_soup))
-        sendMessage(gmail, message)
+        if send_email == True:
+            message_soup = constructDigestSoup(papers=papers, template=template)
+            message = constructEmail(text=message_soup.get_text(),
+                                     html=str(message_soup))
+            sendMessage(gmail, message)
 
-    if mark_read == True:
-        for message in messages:
-            markRead(gmail, message['id'])
+        if mark_read == True:
+            for message in messages:
+                markRead(gmail, message['id'])
 
 
 if __name__ == '__main__':
