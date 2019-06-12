@@ -18,6 +18,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 send_email = True
 show_scholar_emails = False
 show_template = False
+mark_read = True
 
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
@@ -164,6 +165,11 @@ def getScholarMessages(gmail):
 # Takes a message id and reads the message using google api
 def readMessage(gmail, message_id, format="full"):
     return gmail.users().messages().get(id=message_id, userId=ID, format=format).execute()
+
+# Mark email as being read (remove unread label)
+def markRead(gmail, message_id):
+    body = {'removeLabelIds' : ['UNREAD']}
+    return gmail.users().messages().modify(id=message_id, userId=ID, body=body).execute()
 
 # Writes snippets from messages
 def summarizeMessages(gmail, messages):
@@ -346,6 +352,9 @@ def main():
                                  html=str(message_soup))
         sendMessage(gmail, message)
 
+    if mark_read == True:
+        for message in messages:
+            markRead(gmail, message['id'])
 
 
 if __name__ == '__main__':
