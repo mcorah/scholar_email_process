@@ -24,6 +24,7 @@ ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
 email_subject = "Google Scholar Summary!"
 address = 'micahcorah@gmail.com'
+file_dir = os.path.dirname(__file__)
 
 # match email entries
 entry_start = "h3"
@@ -321,19 +322,21 @@ def main():
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    token_file = file_dir + '/token.pickle'
+    if os.path.exists(token_file):
+        with open(token_file, 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            credentials_file = file_dir + '/credentials.json'
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                credentials_file, SCOPES)
             creds = flow.run_local_server()
         # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
+        with open(token_file, 'wb') as token:
             pickle.dump(creds, token)
 
     gmail = build('gmail', 'v1', credentials=creds)
