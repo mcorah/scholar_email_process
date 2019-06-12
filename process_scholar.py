@@ -30,6 +30,18 @@ entry_length = 5
 
 special_authors = ["Nathan Michael"]
 
+def subjectPriority():
+    return [citesMe, isSpecial, isArticle, isCitation]
+
+# Sort objects by decreasing priority
+# Input is a list of values and a list of priorities or transformations, highest
+# priority first
+# (greater values indicate greater priority)
+def prioritySort(values, priorities):
+    for f in reversed(priorities):
+        values.sort(key=f)
+    return reversed(values)
+
 
 # returns true if the subject is for articles that cite me
 def citesMe(s):
@@ -88,7 +100,8 @@ class Paper:
         self.subjects.append(subject)
 
     def subjectsString(self):
-        return ', '.join(map(abbreviateSubject, self.subjects))
+        s = prioritySort(self.subjects, priorities = subjectPriority())
+        return ', '.join(map(abbreviateSubject, s))
 
     def summarize(self):
         print("Title: " + self.title)
