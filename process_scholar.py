@@ -33,15 +33,24 @@ special_authors = ["Nathan Michael"]
 def subjectPriority():
     return [citesMe, isSpecial, isArticle, isCitation]
 
+def paperPriority():
+    # returns a function that returns true if a paper has a subject that matches
+    # a condition
+    has = lambda f : lambda paper : any(f(s) for s in paper.subjects)
+
+    return [has(citesMe), has(isSpecial), lambda x : len(x.subjects)]
+
 # Sort objects by decreasing priority
 # Input is a list of values and a list of priorities or transformations, highest
 # priority first
 # (greater values indicate greater priority)
 def prioritySort(values, priorities):
-    for f in reversed(priorities):
-        values.sort(key=f)
-    return reversed(values)
+    # start by flattening the list
+    l = list(values)
 
+    for f in reversed(priorities):
+        l.sort(key=f)
+    return reversed(l)
 
 # returns true if the subject is for articles that cite me
 def citesMe(s):
@@ -257,6 +266,9 @@ def constructEmail(text, html, message_type = 'html'):
 # template: soup to use as a template (contents go under div)
 def constructDigestSoup(papers, template):
     soup = template
+
+    # sort papers according to specified priorities
+    papers = prioritySort(papers, priorities=paperPriority())
 
     for paper in papers:
         soup.body.div.extend(paper.soup())
