@@ -120,7 +120,7 @@ def summarizeMessages(gmail, messages):
         #print(message['snippet'])
 
 # Turn scholar updates into a map from titles to paper objects
-def parseMessages(gmail, messages):
+def parseMessagePapers(gmail, messages):
     papers = {}
     for a in messages:
         subject, raw_papers = parseMessage(gmail, a['id'])
@@ -151,6 +151,10 @@ def parseMessage(gmail, message_id):
 
     text = base64.urlsafe_b64decode(body)
     soup = BeautifulSoup(text, 'html.parser')
+
+    if show_scholar_emails:
+        print(soup.prettify())
+
     papers = dunkForPapers(soup)
 
     #print("Papers:")
@@ -162,12 +166,22 @@ def parseMessage(gmail, message_id):
 
     return subject, papers
 
+# soup the message. Used in turning the original message into a template
+def getMessageSoup(gmail, message_id):
+    message = readMessage(gmail, message_id)
+    payload = message['payload']
+    headers = payload.get('headers', [])
+    body = payload['body']['data']
+    text = base64.urlsafe_b64decode(body)
+    return BeautifulSoup(text, 'html.parser')
+
 # pulls subject from the header
 def getSubject(headers):
     for header in headers:
         if header['name'] == 'Subject':
             return header['value']
 
+# Pull tags that constitute paper entries
 def dunkForPapers(soup):
     raw_papers = []
     contents = soup.body.div.contents
@@ -177,6 +191,20 @@ def dunkForPapers(soup):
 
     return raw_papers
 
+
+# Delete body from an email so that it can be refilled
+def constructSoupTemplate(gmail, message):
+    soup = getMessageSoup(gmail, message['id'])
+
+    soup.body.div.clear()
+
+    if show_template:
+        print("Email template (contents go under <div>):")
+        print(soup.prettify())
+
+    return soup
+
+
 # pulls title string from a raw paper
 def getTitle(raw_paper):
     # title is in the first tag under 'a'
@@ -184,13 +212,21 @@ def getTitle(raw_paper):
 
 # construct the output email
 # see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
-def constructEmail(papers):
+def constructEmail(text, html, message_type = 'html'):
     message = MIMEMultipart('alternative')
     message['To'] = address
     message['From'] = address
     message['Subject'] = email_subject
-    message.attach(MIMEText('Hello World!', 'plain'))
+    message.attach(MIMEText(html, 'html'))
+    message.attach(MIMEText(text, 'plain'))
     return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
+
+# Takes template and paper objects and outputs digest email soup
+# papers: list of paper objects
+# template: soup to use as a template (contents go under div)
+def constructDigestSoup(papers, template):
+    soup = template
+    return soup
 
 
 # see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
@@ -238,13 +274,17 @@ def main():
     gmail = build('gmail', 'v1', credentials=creds)
 
     messages = getScholarMessages(gmail)
+    if len(messages) > 0:
+        template = constructSoupTemplate(gmail, messages[0])
 
-    papers = parseMessages(gmail, messages)
-    for paper in papers.values():
-        paper.summarize()
+        papers = parseMessagePapers(gmail, messages)
+        for paper in papers.values():
+            paper.summarize()
 
     if send_email == True:
-        message = constructEmail(papers)
+        message_soup = constructDigestSoup(papers=papers, template=template)
+        message = constructEmail(text=message_soup.get_text(),
+                                 html=str(message_soup))
         sendMessage(gmail, message)
 
 
