@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from apiclient import errors
 
 from bs4 import BeautifulSoup
+from bs4 import Tag
 import base64
 
 # If modifying these scopes, delete the file token.pickle.
@@ -16,7 +17,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 send_email = True
 show_scholar_emails = False
-show_template = True
+show_template = False
 
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
@@ -94,6 +95,23 @@ class Paper:
         print("Subjects: " + self.subjectsString())
         print()
 
+    def subjectsTag(self):
+        tag = Tag(name="div")
+        bold = Tag(name='b')
+        tag.append(bold)
+        tag.b.string = self.subjectsString()
+        return tag
+
+    # returns list of soup objects for the paper entry
+    def soup(self):
+        old = self.body
+        subjects = self.subjectsTag()
+
+        # name/link, authors, summary, subject, break
+        parts = [old[0], old[1], old[2], subjects, old[4]]
+
+        return parts
+
 
 # Pull an email label such as "UNREAD"
 def getLabel(gmail, label_name):
@@ -129,7 +147,7 @@ def parseMessagePapers(gmail, messages):
             if not title in papers:
                 papers[title] = Paper(raw_paper)
             papers[title].addSubject(subject)
-    return papers
+    return papers.values()
 
 def parseMessage(gmail, message_id):
     message = readMessage(gmail, message_id)
@@ -226,6 +244,10 @@ def constructEmail(text, html, message_type = 'html'):
 # template: soup to use as a template (contents go under div)
 def constructDigestSoup(papers, template):
     soup = template
+
+    for paper in papers:
+        soup.body.div.extend(paper.soup())
+
     return soup
 
 
@@ -278,7 +300,7 @@ def main():
         template = constructSoupTemplate(gmail, messages[0])
 
         papers = parseMessagePapers(gmail, messages)
-        for paper in papers.values():
+        for paper in papers:
             paper.summarize()
 
     if send_email == True:
