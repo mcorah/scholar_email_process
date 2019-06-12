@@ -38,7 +38,7 @@ def paperPriority():
     # a condition
     has = lambda f : lambda paper : any(f(s) for s in paper.subjects)
 
-    return [has(citesMe), has(isSpecial), lambda x : len(x.subjects)]
+    return [has(citesMe), has(isSpecial), lambda x : len(x.subjects), has(isArticle), has(isCitation)]
 
 # Sort objects by decreasing priority
 # Input is a list of values and a list of priorities or transformations, highest
