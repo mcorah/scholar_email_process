@@ -98,6 +98,10 @@ def abbreviateSubject(s):
             # (is an article)
             return name + "(a)"
 
+# returns true if a soup tag has facebook and twitter links
+def isFacebook(tag):
+    return not tag.find(name='img') == None
+
 # Representation of a single paper alert and the related topics
 class Paper:
     def __init__(self, body):
@@ -128,9 +132,17 @@ class Paper:
     def soup(self):
         old = self.body
         subjects = self.subjectsTag()
+        linebreak = BeautifulSoup("<br/>", 'html.parser')
 
-        # name/link, authors, summary, subject, break
-        parts = [old[0], old[1], old[2], subjects, old[4]]
+        # Sometimes a paper entry will omit the summary in which case the entry
+        # will instead have the Facebook/Twitter image links
+        parts = None
+        if not isFacebook(old[2]):
+            # name/link, authors, summary, subject, break
+            parts = [old[0], old[1], old[2], subjects, linebreak]
+        else:
+            # there is no summary
+            parts = [old[0], old[1], subjects, linebreak]
 
         return parts
 
