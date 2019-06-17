@@ -309,7 +309,7 @@ def sendMessage(gmail, message):
   try:
     message = (gmail.users().messages().send(userId=ID, body=message)
                .execute())
-    print('Message Id: %s' % message['id'])
+    # print('Message Id: %s' % message['id'])
     return message
   except errors.HttpError as error:
     print('An error occurred: %s' % error)
@@ -351,16 +351,21 @@ def main():
         for paper in papers:
             paper.summarize()
 
+        print('Processed results for ' + str(len(papers)) + ' unique papers.')
+
         if send_email == True:
+            print('Sending email')
+
             message_soup = constructDigestSoup(papers=papers, template=template)
             message = constructEmail(text=message_soup.get_text(),
                                      html=str(message_soup))
             sendMessage(gmail, message)
 
         if mark_read == True:
+            print('Marking messages as "read"')
+
             for message in messages:
                 markRead(gmail, message['id'])
-
 
 if __name__ == '__main__':
     main()
