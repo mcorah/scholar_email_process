@@ -148,6 +148,19 @@ class Paper:
 
         return parts
 
+# Simple object for use in maintaining statistics
+class PaperStats:
+    num_emails = 0
+    num_entries = 0
+    num_unique = 0
+
+    def printStats(self):
+        print(
+        'Processed results for:\n' +
+        '  ' + str(self.num_emails) + ' emails\n'
+        '  ' + str(self.num_entries) + ' entries\n'
+        '  ' + str(self.num_unique) + ' unique papers'
+        )
 
 # Pull an email label such as "UNREAD"
 def getLabel(gmail, label_name):
@@ -179,15 +192,22 @@ def summarizeMessages(gmail, messages):
         #print(message['snippet'])
 
 # Turn scholar updates into a map from titles to paper objects
-def parseMessagePapers(gmail, messages):
+def parseMessagePapers(gmail, messages, paper_stats = PaperStats()):
     papers = {}
     for a in messages:
         subject, raw_papers = parseMessage(gmail, a['id'])
+
+        paper_stats.num_entries += len(raw_papers)
+
         for raw_paper in raw_papers:
             title = getTitle(raw_paper)
             if not title in papers:
                 papers[title] = Paper(raw_paper)
             papers[title].addSubject(subject)
+
+    paper_stats.num_emails = len(messages)
+    paper_stats.num_unique = len(papers)
+
     return papers.values()
 
 def parseMessage(gmail, message_id):
@@ -342,16 +362,20 @@ def main():
     gmail = build('gmail', 'v1', credentials=creds)
 
     messages = getScholarMessages(gmail)
+
     if len(messages) == 0:
         print('There are no scholar emails to process.')
     else:
+
         template = constructSoupTemplate(gmail, messages[0])
 
-        papers = parseMessagePapers(gmail, messages)
+        paper_stats = PaperStats()
+        papers = parseMessagePapers(gmail, messages, paper_stats)
+
         for paper in papers:
             paper.summarize()
 
-        print('Processed results for ' + str(len(papers)) + ' unique papers.')
+        paper_stats.printStats()
 
         if send_email == True:
             print('Sending email')
