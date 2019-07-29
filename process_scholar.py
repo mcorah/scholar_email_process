@@ -33,14 +33,15 @@ entry_length = 5
 special_authors = ["Nathan Michael"]
 
 def subjectPriority():
-    return [citesMe, isSpecial, isArticle, isCitation]
+    return [citesMe, isSpecial, isArticle, isCitation, isRelated]
 
 def paperPriority():
     # returns a function that returns true if a paper has a subject that matches
     # a condition
     has = lambda f : lambda paper : any(f(s) for s in paper.subjects)
 
-    return [has(citesMe), has(isSpecial), lambda x : len(x.subjects), has(isArticle), has(isCitation)]
+    return [has(citesMe), has(isSpecial), lambda x : len(x.subjects),
+            has(isArticle), has(isCitation), has(isRelated)]
 
 # Sort objects by decreasing priority
 # Input is a list of values and a list of priorities or transformations, highest
@@ -76,6 +77,10 @@ def isCitation(s):
 def isArticle(s):
     return "new articles" in s.lower()
 
+# is an article
+def isRelated(s):
+    return "new related research" in s.lower()
+
 # is new results
 def isResults(s):
     return "new results" in s.lower()
@@ -96,9 +101,15 @@ def abbreviateSubject(s):
         name = parseName(s)
         if isCitation(s):
             return name + "(c)"
-        else:
+        elif isArticle(s):
             # (is an article)
             return name + "(a)"
+        elif isRelated(s):
+            # (is an article)
+            return name + "(r)"
+        else:
+            # (is unknown)
+            return name + "(u)"
 
 # returns true if a soup tag has facebook and twitter links
 def isFacebook(tag):
