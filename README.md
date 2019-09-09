@@ -1,5 +1,5 @@
 ## Usage
-Run `process_scholar.py`.
+Run `process_scholar.py` using Python 3.
 This script does not take any arguments.
 
 ## Configuration
