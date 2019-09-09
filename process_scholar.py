@@ -1,12 +1,13 @@
 from __future__ import print_function
 import pickle
-import os.path
+import os
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from apiclient import errors
+import yaml
 
 from bs4 import BeautifulSoup
 from bs4 import Tag
@@ -23,14 +24,34 @@ mark_read = True
 ID = 'me'
 scholar_email = 'scholaralerts-noreply@google.com'
 email_subject = "Google Scholar Summary!"
-address = 'micahcorah@gmail.com'
+email = ''
 file_dir = os.path.dirname(__file__)
 
 # match email entries
 entry_start = "h3"
 entry_length = 5
 
-special_authors = ["Nathan Michael"]
+special_authors = []
+
+def loadConfigs():
+    configuration_file = os.getenv("HOME") + "/.scholar.yaml"
+
+    if not os.path.exists(configuration_file):
+        print("Please update scholar.yaml and copy to ~/.scholar.yaml")
+        return False
+
+    configs = yaml.load(open(configuration_file, 'r'), Loader=yaml.Loader)
+
+    email = configs['email']
+    scholar_mail = configs['scholar_email']
+    email_subject = configs['email_subject']
+    special_authors = configs['special_authors']
+
+    mark_read = configs['mark_read']
+    show_scholar_emails = configs['show_scholar_emails']
+    send_email = configs['send_email']
+
+    return True
 
 def subjectPriority():
     return [citesMe, isSpecial, isArticle, isCitation, isRelated]
@@ -304,8 +325,8 @@ def getTitle(raw_paper):
 # see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
 def constructEmail(text, html, message_type = 'html'):
     message = MIMEMultipart('alternative')
-    message['To'] = address
-    message['From'] = address
+    message['To'] = email
+    message['From'] = email
     message['Subject'] = email_subject
     message.attach(MIMEText(html, 'html'))
     message.attach(MIMEText(text, 'plain'))
@@ -346,6 +367,9 @@ def sendMessage(gmail, message):
     print('An error occurred: %s' % error)
 
 def main():
+    if not loadConfigs():
+        return False
+
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels.
     """
