@@ -1,12 +1,10 @@
 # Edit fields and copy to ~/.scholar.yaml
 
 email: "email@gmail.com"
-scholar_email: 'scholaralerts-noreply@google.com' # dummy address
 email_subject: "Google Scholar Summary!"
 
 special_authors: ["Jane Doe"] # Prioritize authors in results
 
 mark_read: true # mark emails as read
-show_scholar_emails: true # send summaries of alerts to stdout
 send_email: true
 

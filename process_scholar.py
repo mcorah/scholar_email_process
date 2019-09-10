@@ -42,13 +42,13 @@ def loadConfigs():
 
     configs = yaml.load(open(configuration_file, 'r'), Loader=yaml.Loader)
 
+    global email, email_subject, special_authors, mark_read, send_email
+
     email = configs['email']
-    scholar_mail = configs['scholar_email']
     email_subject = configs['email_subject']
     special_authors = configs['special_authors']
 
     mark_read = configs['mark_read']
-    show_scholar_emails = configs['show_scholar_emails']
     send_email = configs['send_email']
 
     return True
