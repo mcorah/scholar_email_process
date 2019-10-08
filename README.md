@@ -14,5 +14,5 @@ We do not currently distributed credentials for this application so you will
 have to create your own.
 The [Gmail Python Quickstart](https://developers.google.com/gmail/api/quickstart/python)
 will allow you to request a set of application credentials.
-Download these credentials, and place `credential.json` in the application
+Download these credentials, and place `credentials.json` in the application
 directory.
