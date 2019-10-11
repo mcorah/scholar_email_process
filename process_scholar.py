@@ -329,7 +329,8 @@ def constructEmail(text, html, message_type = 'html'):
     message['From'] = email
     message['Subject'] = email_subject
     message.attach(MIMEText(html, 'html'))
-    message.attach(MIMEText(text, 'plain'))
+    #message.attach(MIMEText(text, 'plain'))
+
     return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
 # Takes template and paper objects and outputs digest email soup
