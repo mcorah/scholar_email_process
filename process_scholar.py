@@ -323,13 +323,12 @@ def getTitle(raw_paper):
 
 # construct the output email
 # see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
-def constructEmail(text, html, message_type = 'html'):
-    message = MIMEMultipart('alternative')
+def constructEmail(html = None):
+    message = MIMEMultipart()
     message['To'] = email
     message['From'] = email
     message['Subject'] = email_subject
     message.attach(MIMEText(html, 'html'))
-    #message.attach(MIMEText(text, 'plain'))
 
     return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
@@ -417,8 +416,7 @@ def main():
             print('Sending email')
 
             message_soup = constructDigestSoup(papers=papers, template=template)
-            message = constructEmail(text=message_soup.get_text(),
-                                     html=str(message_soup))
+            message = constructEmail(str(message_soup))
             sendMessage(gmail, message)
 
         if mark_read == True:
