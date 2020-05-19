@@ -209,25 +209,28 @@ def getScholarMessages(gmail):
     return getMessages(gmail, "UNREAD", query="from:" + scholar_email)
 
 # Takes a message id and reads the message using google api
-def readMessage(gmail, message_id, format="full"):
+def readMessage(gmail, message_description, format="full"):
+    message_id = message_description['id']
+
     return gmail.users().messages().get(id=message_id, userId=ID, format=format).execute()
 
 # Mark email as being read (remove unread label)
-def markRead(gmail, message_id):
+def markRead(gmail, message_description):
+    message_id = message_description['id']
     body = {'removeLabelIds' : ['UNREAD']}
     return gmail.users().messages().modify(id=message_id, userId=ID, body=body).execute()
 
 # Writes snippets from messages
 def summarizeMessages(gmail, messages):
-    for a in messages:
-        message = readMessage(gmail, a['id'], format='minimal')
+    for message_description in messages:
+        message = readMessage(gmail, message_description, format='minimal')
         #print(message['snippet'])
 
 # Turn scholar updates into a map from titles to paper objects
 def parseMessagePapers(gmail, messages, paper_stats = PaperStats()):
     papers = {}
-    for a in messages:
-        subject, raw_papers = parseMessage(gmail, a['id'])
+    for message_description in messages:
+        subject, raw_papers = parseMessage(gmail, message_description)
 
         paper_stats.num_entries += len(raw_papers)
 
@@ -318,7 +321,7 @@ def dunkForPapers(soup):
 
 # Delete body from an email so that it can be refilled
 def constructSoupTemplate(gmail, message_description):
-    message = readMessage(gmail, message_description['id'])
+    message = readMessage(gmail, message_description)
     soup = getMessageSoup(message)
 
     soup.body.div.clear()
@@ -437,7 +440,7 @@ def main():
             print('Marking messages as "read"')
 
             for message in messages:
-                markRead(gmail, message['id'])
+                markRead(gmail, message)
 
 if __name__ == '__main__':
     main()
