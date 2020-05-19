@@ -278,9 +278,7 @@ def getHtmlBody(payload):
 
     def doBody(obj):
         if 'body' in obj and obj['mimeType'] == 'text/html':
-            body = obj["body"]
-            print(body.keys())
-            bodies.append(body)
+            bodies.append(obj["body"])
 
     doBody(payload)
 
