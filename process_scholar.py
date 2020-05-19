@@ -44,12 +44,12 @@ def loadConfigs():
 
     global email, email_subject, special_authors, mark_read, send_email
 
-    email = configs['email']
-    email_subject = configs['email_subject']
-    special_authors = configs['special_authors']
+    email = configs.get('email', email)
+    email_subject = configs.get('email_subject', email_subject)
+    special_authors = configs.get('special_authors', special_authors)
 
-    mark_read = configs['mark_read']
-    send_email = configs['send_email']
+    mark_read = configs.get('mark_read', mark_read)
+    send_email = configs.get('send_email', send_email)
 
     return True
 
