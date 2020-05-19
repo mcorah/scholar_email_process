@@ -258,10 +258,7 @@ def parseMessage(gmail, message_id):
     #print(payload['mimeType'])
 
     #print('Body:')
-    body = payload['body']['data']
-
-    text = base64.urlsafe_b64decode(body)
-    soup = BeautifulSoup(text, 'html.parser')
+    soup = getMessageSoup(gmail, message_id)
 
     if show_scholar_emails:
         print(soup.prettify())
@@ -277,13 +274,39 @@ def parseMessage(gmail, message_id):
 
     return subject, papers
 
+# Sometimes the body is hidden or there are multiple bodies
+# We have to go through this because Google now sends a multi-part message using
+# amp
+def getHtmlBody(payload):
+    bodies = []
+
+    def doBody(obj):
+        if 'body' in obj and obj['mimeType'] == 'text/html':
+            body = obj["body"]
+            print(body.keys())
+            bodies.append(body)
+
+    doBody(payload)
+
+    if 'parts' in payload:
+        for part in payload['parts']:
+            doBody(part)
+
+    if len(bodies) == 0:
+        print("Could not find a suitable (html) message body")
+        return
+    elif len(bodies) > 1:
+        print("Found multiple html bodies")
+
+    return bodies[0]
+
 # soup the message. Used in turning the original message into a template
 def getMessageSoup(gmail, message_id):
     message = readMessage(gmail, message_id)
     payload = message['payload']
     headers = payload.get('headers', [])
-    body = payload['body']['data']
-    text = base64.urlsafe_b64decode(body)
+    body = getHtmlBody(payload)
+    text = base64.urlsafe_b64decode(body['data'])
     return BeautifulSoup(text, 'html.parser')
 
 # pulls subject from the header
@@ -301,7 +324,6 @@ def dunkForPapers(soup):
             raw_papers.append(contents[count:count+entry_length])
 
     return raw_papers
-
 
 # Delete body from an email so that it can be refilled
 def constructSoupTemplate(gmail, message):
