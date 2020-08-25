@@ -88,7 +88,10 @@ def isSpecial(s):
 
 # pull name for authors
 def parseName(s):
-    return s[0:s.rfind("-")-1]
+    if isCitation(s):
+        return s[s.rfind(" by ")+4:]
+    else:
+        return s[0:s.rfind("-")-1]
 
 # check whether the subject refers to an author citation (or article)
 def isCitation(s):
