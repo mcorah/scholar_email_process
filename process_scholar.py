@@ -95,11 +95,11 @@ def parseName(s):
 
 # check whether the subject refers to an author citation (or article)
 def isCitation(s):
-    return "new citations" in s.lower()
+    return "new citation" in s.lower()
 
 # is an article
 def isArticle(s):
-    return "new articles" in s.lower()
+    return "new article" in s.lower()
 
 # is an article
 def isRelated(s):
