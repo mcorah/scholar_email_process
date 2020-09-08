@@ -78,7 +78,8 @@ def prioritySort(values, priorities):
 
 # returns true if the subject is for articles that cite me
 def citesMe(s):
-    return s == "New citations to my articles"
+    return s == "New citations to my articles" or ("your articles" in s)
+
 
 def isSpecial(s):
     for author in special_authors:
