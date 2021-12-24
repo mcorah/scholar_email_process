@@ -175,12 +175,7 @@ class Paper:
         # Sometimes a paper entry will omit the summary in which case the entry
         # will instead have the Facebook/Twitter image links
         parts = None
-        if not isFacebook(old[2]):
-            # name/link, authors, summary, subject, break
-            parts = [old[0], old[1], old[2], subjects, linebreak]
-        else:
-            # there is no summary
-            parts = [old[0], old[1], subjects, linebreak]
+        parts = old + [subjects, linebreak]
 
         return parts
 
@@ -338,7 +333,10 @@ def constructSoupTemplate(gmail, message_description):
 # pulls title string from a raw paper
 def getTitle(raw_paper):
     # title is in the first tag under 'a'
-    return raw_paper[0].a.get_text()
+    for part in raw_paper:
+        if part.find('a'):
+            return part.a.get_text()
+    raise Exception("No title found")
 
 # construct the output email
 # see: https://medium.com/lyfepedia/sending-emails-with-gmail-api-and-python-49474e32c81f
