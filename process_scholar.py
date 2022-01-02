@@ -148,6 +148,10 @@ class Paper:
         self.subjects = []
 
     def addSubject(self, subject):
+        if subject in self.subjects:
+            print("Duplicate subject detected! " + str(subject))
+            return
+
         self.subjects.append(subject)
 
     def subjectsString(self):
