@@ -29,7 +29,7 @@ file_dir = os.path.dirname(__file__)
 
 # match email entries
 entry_start = "h3"
-entry_length = 5
+entry_length = 4
 
 special_authors = []
 
@@ -172,14 +172,25 @@ class Paper:
 
     # returns list of soup objects for the paper entry
     def soup(self):
+        # How is the original body structured (in parts)?
+        # 1. title
+        # 2. authors
+        # 3. summary
+        # 4. citation (if there is one)
+
         old = self.body
         subjects = self.subjectsTag()
         linebreak = BeautifulSoup("<br/>", 'html.parser')
 
         # Sometimes a paper entry will omit the summary in which case the entry
         # will instead have the Facebook/Twitter image links
-        parts = None
-        parts = old + [subjects, linebreak]
+        parts = old[0:3]
+
+        # Test for the cites block
+        if old[3].name == "table":
+            parts += old[3]
+
+        parts += [subjects, linebreak]
 
         return parts
 
