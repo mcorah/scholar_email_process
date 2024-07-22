@@ -312,12 +312,18 @@ def getSubject(headers):
         if header['name'] == 'Subject':
             return header['value']
 
+# Return true if this item is the start of a paper in the the html body
+# Papers are always h3 tags with details in child 'a' tags
+# We can use the A tags to distinguish from other tags
+def isEntryStart(html_item):
+    return html_item.name == entry_start and html_item.find_all('a')
+
 # Pull tags that constitute paper entries
 def dunkForPapers(soup):
     raw_papers = []
     contents = soup.body.div.contents
     for count, item in enumerate(contents):
-        if item.name == entry_start:
+        if isEntryStart(item):
             raw_papers.append(contents[count:count+entry_length])
 
     return raw_papers
