@@ -202,9 +202,11 @@ def getLabel(gmail, label_name):
     return gmail.users().labels().get(id=label_name, userId=ID).execute()
 
 # Returns matching message ids
+# Set maxResults to the maximum (500) because scholar can send a large number of
+# messages in a few days
 def getMessages(gmail, label_name, query=""):
     json = gmail.users().messages().list(\
-            userId=ID, labelIds=[label_name], q=query).execute()
+            userId=ID, labelIds=[label_name], q=query, maxResults=500).execute()
     return json.get('messages', [])
 
 # Returns ids of matching scholar messages
